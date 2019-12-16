@@ -857,6 +857,12 @@ void G_SetClientFrame (edict_t *ent)
 	gclient_t	*client;
 	qboolean	duck, run;
 
+	vec3_t	forward, right, up;
+	vec3_t	start;
+	vec3_t	offset;
+	vec3_t tempvec;
+	static float cldwn2;
+
 	if (ent->s.modelindex != 255)
 		return;		// not in the player model
 
@@ -922,6 +928,13 @@ newanim:
 	{	// running
 		if (duck)
 		{
+			if (level.time > cldwn2 + 2) 
+			{
+				cldwn2 = level.time;
+				AngleVectors(ent->client->v_angle, forward, NULL, up);
+				VectorScale(forward, 800, ent->velocity);
+			}
+			
 			ent->s.frame = FRAME_crwalk1;
 			client->anim_end = FRAME_crwalk6;
 		}
@@ -940,7 +953,7 @@ newanim:
 		}
 		else
 		{
-			ent->s.frame = FRAME_stand01;
+			ent->s.frame = FRAME_stand01; //was frame_stand01 Q2MOD
 			client->anim_end = FRAME_stand40;
 		}
 	}

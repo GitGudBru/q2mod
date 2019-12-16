@@ -607,13 +607,53 @@ but is called after each death and level change in deathmatch
 void InitClientPersistant (gclient_t *client)
 {
 	gitem_t		*item;
-
+	/*
+	char arr[4][40] =
+	{ "Blaster",
+	"super shotgun",
+	"rocket launcher",
+	"bfg10k"
+	};
+	*/
 	memset (&client->pers, 0, sizeof(client->pers));
-
+	/*
+	for (int i = 0; i < 4; i++)
+	{
+		item = FindItem(arr[i]);
+		client->pers.selected_item = ITEM_INDEX(item);
+		client->pers.inventory[client->pers.selected_item] = 1;
+	}
+	*/
+			//Q2MOD if you want to start out with these guns 
 	item = FindItem("Blaster");
 	client->pers.selected_item = ITEM_INDEX(item);
 	client->pers.inventory[client->pers.selected_item] = 1;
+	item = FindItem("Super Shotgun");
+	client->pers.selected_item = ITEM_INDEX(item);
+	client->pers.inventory[client->pers.selected_item] = 1;
+	item = FindItem("Rocket Launcher");
+	client->pers.selected_item = ITEM_INDEX(item);
+	client->pers.inventory[client->pers.selected_item] = 1;	
+	item = FindItem("BFG10K");
+	client->pers.selected_item = ITEM_INDEX(item);
+	client->pers.inventory[client->pers.selected_item] = 1;	
+	item = FindItem("grenade launcher");
+	client->pers.selected_item = ITEM_INDEX(item);
+	client->pers.inventory[client->pers.selected_item] = 1;	
 
+	/*
+	for (int i = 0; i<game.num_items; i++)
+	{
+		item = itemlist + i;
+		if (!item->pickup)
+			continue;
+		if (!(item->flags & IT_AMMO))
+			continue;
+		Add_Ammo(client, item, 1000); //or ent
+	}
+	*/
+	//Q2MOD
+	
 	client->pers.weapon = item;
 
 	client->pers.health			= 100;
@@ -625,6 +665,8 @@ void InitClientPersistant (gclient_t *client)
 	client->pers.max_grenades	= 50;
 	client->pers.max_cells		= 200;
 	client->pers.max_slugs		= 50;
+
+	client->pers.homing_state = 1;	//Q2MOD Citing Chris Hilton DeveLS
 
 	client->pers.connected = true;
 }

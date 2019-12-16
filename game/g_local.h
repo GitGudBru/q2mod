@@ -854,6 +854,8 @@ typedef struct
 
 	gitem_t		*weapon;
 	gitem_t		*lastweapon;
+	
+	qboolean	homing_state;	// Q2MOD Citing Chris Hilton, DeveLS - are homing missiles activated
 
 	int			power_cubes;	// used for tracking the cubes in coop games
 	int			score;			// for calculating total unit score in coop games

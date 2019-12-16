@@ -158,6 +158,16 @@ void Cmd_Give_f (edict_t *ent)
 	qboolean	give_all;
 	edict_t		*it_ent;
 
+////////////////////
+///    Q2MOD     ///
+////////////////////
+
+	vec3_t	forward, right, up;
+	vec3_t	start;
+	vec3_t	offset;
+	vec3_t tempvec;
+	static float cldwn1, cldwn2;
+
 	if (deathmatch->value && !sv_cheats->value)
 	{
 		gi.cprintf (ent, PRINT_HIGH, "You must run the server with '+set cheats 1' to enable this command.\n");
@@ -296,7 +306,7 @@ void Cmd_Give_f (edict_t *ent)
 }
 
 
-/*
+/*//
 ==================
 Cmd_God_f
 
@@ -899,6 +909,81 @@ void Cmd_PlayerList_f(edict_t *ent)
 	gi.cprintf(ent, PRINT_HIGH, "%s", text);
 }
 
+/*
++=================
+Cmd_Homing_f   Q2MOD - Citing Chris Hilton DeveLS 
+=================
+*/
+void Cmd_Homing_f(edict_t *ent)
+{
+	int		i;
+
+	i = atoi(gi.argv(1));
+	
+	switch (i)
+	{
+	case 0:
+		gi.cprintf(ent, PRINT_HIGH, "Homing missiles off\n");
+		ent->client->pers.homing_state = 0;
+		break;
+	case 1:
+	default:
+		gi.cprintf(ent, PRINT_HIGH, "HOMING MISSILES ON\n");
+		ent->client->pers.homing_state = 1;
+		break;
+	}
+}
+
+/*
+=================
+Cmd_JumpPack_f	Q2MOD
+=================
+*/
+void Cmd_JumpPack_f(edict_t *ent)
+{
+	char	*msg;
+
+	vec3_t	forward, right, up;
+	vec3_t	start;
+	vec3_t	offset;
+	vec3_t tempvec;
+	static float cldwn1;
+
+//	if (!Q_stricmp(gi.argv(1), "ability1"))
+//	{
+		if (level.time > cldwn1 + 3) {
+
+		gi.bprintf(PRINT_MEDIUM, "Jumped!!\n");
+
+		msg = "JUMPED\n";
+
+		cldwn1 = level.time;
+		AngleVectors(ent->client->v_angle, forward, NULL, up);
+		VectorScale(up, 285, ent->velocity);
+	//	VectorScale(forward, 1000, ent->velocity);
+
+		gi.cprintf(ent, PRINT_HIGH, msg);
+		}
+//	}
+}
+
+/*
+=================
+Cmd_Robo_f	Q2MOD
+=================
+*/
+
+void Cmd_Robo_f(edict_t *ent)
+{
+	char	*msg;
+	gi.bprintf(PRINT_MEDIUM, "Activate Chunky Boi Uno.\n");
+
+	//ent->viewheight+500;
+	//ent->client->ps.viewoffset-440;
+	ent->client->ps.viewangles[YAW] + 5 ;
+	//v[YAW] = ent->client->v_angle[YAW] + 5;
+}
+
 
 /*
 =================
@@ -949,6 +1034,12 @@ void ClientCommand (edict_t *ent)
 		Cmd_Drop_f (ent);
 	else if (Q_stricmp (cmd, "give") == 0)
 		Cmd_Give_f (ent);
+	else if (Q_stricmp(cmd, "jumppack") == 0) //Q2MOD
+		Cmd_JumpPack_f(ent);
+	else if (Q_stricmp(cmd, "homing") == 0)  //Q2MOD
+		Cmd_Homing_f(ent);
+	else if (Q_stricmp(cmd, "robo") == 0)  //Q2MOD
+		Cmd_Robo_f(ent);
 	else if (Q_stricmp (cmd, "god") == 0)
 		Cmd_God_f (ent);
 	else if (Q_stricmp (cmd, "notarget") == 0)

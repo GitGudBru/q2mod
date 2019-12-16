@@ -364,7 +364,10 @@ void fire_blaster (edict_t *self, vec3_t start, vec3_t dir, int damage, int spee
 	bolt->clipmask = MASK_SHOT;
 	bolt->solid = SOLID_BBOX;
 	bolt->s.effects |= effect;
-	VectorClear (bolt->mins);
+	bolt->s.effects |= EF_COLOR_SHELL;
+//	bolt->s.renderfx |= RF_SHELL_GREEN;
+	bolt->s.renderfx |= RF_SHELL_RED;
+	VectorClear(bolt->mins);
 	VectorClear (bolt->maxs);
 	bolt->s.modelindex = gi.modelindex ("models/objects/laser/tris.md2");
 	bolt->s.sound = gi.soundindex ("misc/lasfly.wav");
@@ -617,38 +620,107 @@ void rocket_touch (edict_t *ent, edict_t *other, cplane_t *plane, csurface_t *su
 	G_FreeEdict (ent);
 }
 
-void fire_rocket (edict_t *self, vec3_t start, vec3_t dir, int damage, int speed, float damage_radius, int radius_damage)
+void homing_think(edict_t *ent)  // Q2 MOD Citing Christ Hilton DeveLS :START:
+ {
+	edict_t	*target = NULL;
+	edict_t *blip = NULL;
+	vec3_t	targetdir, blipdir;
+	vec_t	speed;
+	
+	while ((blip = findradius(blip, ent->s.origin, 1000)) != NULL)
+	{
+		if (!(blip->svflags & SVF_MONSTER) && !blip->client)
+			 continue;
+		if (blip == ent->owner)
+			 continue;
+		if (!blip->takedamage)
+			 continue;
+		if (blip->health <= 0)
+			 continue;
+		if (!visible(ent, blip))
+			 continue;
+		if (!infront(ent, blip))
+			 continue;
+		VectorSubtract(blip->s.origin, ent->s.origin, blipdir);
+		blipdir[2] += 16;
+		if ((target == NULL) || (VectorLength(blipdir) < VectorLength(targetdir)))
+		{
+			target = blip;
+			VectorCopy(blipdir, targetdir);
+		}
+	}
+	
+	if (target != NULL)
+	{
+		// target acquired, nudge our direction toward it
+		VectorNormalize(targetdir);
+		VectorScale(targetdir, 0.2, targetdir);
+		VectorAdd(targetdir, ent->movedir, targetdir);
+		VectorNormalize(targetdir);
+		VectorCopy(targetdir, ent->movedir);
+		vectoangles(targetdir, ent->s.angles);
+		speed = VectorLength(ent->velocity);
+		VectorScale(targetdir, speed, ent->velocity);
+	}
+	
+	ent->nextthink = level.time + .1;
+} //Q2 :END:
+
+void fire_rocket(edict_t *self, vec3_t start, vec3_t dir, int damage, int speed, float damage_radius, int radius_damage)
 {
 	edict_t	*rocket;
 
 	rocket = G_Spawn();
-	VectorCopy (start, rocket->s.origin);
-	VectorCopy (dir, rocket->movedir);
-	vectoangles (dir, rocket->s.angles);
-	VectorScale (dir, speed, rocket->velocity);
+	VectorCopy(start, rocket->s.origin);
+	VectorCopy(dir, rocket->movedir);
+	vectoangles(dir, rocket->s.angles);
+	VectorScale(dir, speed, rocket->velocity);
 	rocket->movetype = MOVETYPE_FLYMISSILE;
 	rocket->clipmask = MASK_SHOT;
 	rocket->solid = SOLID_BBOX;
 	rocket->s.effects |= EF_ROCKET;
-	VectorClear (rocket->mins);
-	VectorClear (rocket->maxs);
-	rocket->s.modelindex = gi.modelindex ("models/objects/rocket/tris.md2");
+	rocket->s.effects |= EF_COLOR_SHELL; //Q2MOD
+	rocket->s.renderfx |= RF_SHELL_BLUE; //Q2MOD
+	VectorClear(rocket->mins);
+	VectorClear(rocket->maxs);
+	rocket->s.modelindex = gi.modelindex("models/objects/rocket/tris.md2");
 	rocket->owner = self;
 	rocket->touch = rocket_touch;
-	rocket->nextthink = level.time + 8000/speed;
-	rocket->think = G_FreeEdict;
+	//rocket->nextthink = level.time + 8000/speed;	 Q2MOD 
+	//rocket->think = G_FreeEdict;	Q2MOD
+	// CCH: see if this is a player and if they have homing on.		Q2MOD citing Chris Hilton DeveLS :START:
+	if (self->client && self->client->pers.homing_state)
+	{
+		// CCH: if they have 5 cells, start homing, otherwise normal rocket think
+		if (self->client->pers.inventory[ITEM_INDEX(FindItem("Cells"))] >= 5)
+		{
+			self->client->pers.inventory[ITEM_INDEX(FindItem("Cells"))] -= 5;
+			rocket->nextthink = level.time + .1;
+			rocket->think = homing_think;
+		}
+		else {
+			gi.cprintf(self, PRINT_HIGH, "No cells for homing missile.\n");
+			rocket->nextthink = level.time + 8000 / speed;
+			rocket->think = G_FreeEdict;
+		}
+	}
+	else {
+		rocket->nextthink = level.time + 8000 / speed;
+		rocket->think = G_FreeEdict;
+	}
+	//Q2MOD citing Christ Hilton DeveLS :END:
+
 	rocket->dmg = damage;
 	rocket->radius_dmg = radius_damage;
 	rocket->dmg_radius = damage_radius;
-	rocket->s.sound = gi.soundindex ("weapons/rockfly.wav");
+	rocket->s.sound = gi.soundindex("weapons/rockfly.wav");
 	rocket->classname = "rocket";
 
 	if (self->client)
-		check_dodge (self, rocket->s.origin, dir, speed);
+		check_dodge(self, rocket->s.origin, dir, speed);
 
-	gi.linkentity (rocket);
+	gi.linkentity(rocket);
 }
-
 
 /*
 =================
@@ -891,7 +963,9 @@ void fire_bfg (edict_t *self, vec3_t start, vec3_t dir, int damage, int speed, f
 	bfg->movetype = MOVETYPE_FLYMISSILE;
 	bfg->clipmask = MASK_SHOT;
 	bfg->solid = SOLID_BBOX;
-	bfg->s.effects |= EF_BFG | EF_ANIM_ALLFAST;
+	bfg->s.effects |= EF_PLASMA | EF_ANIM_ALLFAST; //EF_BFG
+	bfg->s.effects |= EF_COLOR_SHELL;		//Q2MOD
+	bfg->s.renderfx |= RF_SHELL_BLUE;		//Q2MOD
 	VectorClear (bfg->mins);
 	VectorClear (bfg->maxs);
 	bfg->s.modelindex = gi.modelindex ("sprites/s_bfg1.sp2");

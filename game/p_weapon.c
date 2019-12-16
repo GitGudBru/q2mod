@@ -711,6 +711,7 @@ void weapon_grenadelauncher_fire (edict_t *ent)
 	vec3_t	offset;
 	vec3_t	forward, right;
 	vec3_t	start;
+	vec3_t		v;
 	int		damage = 120;
 	float	radius;
 
@@ -725,7 +726,15 @@ void weapon_grenadelauncher_fire (edict_t *ent)
 	VectorScale (forward, -2, ent->client->kick_origin);
 	ent->client->kick_angles[0] = -1;
 
+	v[PITCH] = ent->client->v_angle[PITCH];
+	v[YAW] = ent->client->v_angle[YAW] - 4;
+	v[ROLL] = ent->client->v_angle[ROLL];
+	AngleVectors(v, forward, NULL, NULL);
 	fire_grenade (ent, start, forward, damage, 600, 2.5, radius);
+	v[YAW] = ent->client->v_angle[YAW] + 4;
+	AngleVectors(v, forward, NULL, NULL);
+	fire_grenade (ent, start, forward, damage, 592, 2.5, radius); //Q2MOD
+
 
 	gi.WriteByte (svc_muzzleflash);
 	gi.WriteShort (ent-g_edicts);
@@ -761,12 +770,13 @@ void Weapon_RocketLauncher_Fire (edict_t *ent)
 	vec3_t	offset, start;
 	vec3_t	forward, right;
 	int		damage;
+	//int		n;
 	float	damage_radius;
 	int		radius_damage;
 
 	damage = 100 + (int)(random() * 20.0);
-	radius_damage = 120;
-	damage_radius = 120;
+	radius_damage = 320; //120
+	damage_radius = 120; //320
 	if (is_quad)
 	{
 		damage *= 4;
@@ -780,7 +790,9 @@ void Weapon_RocketLauncher_Fire (edict_t *ent)
 
 	VectorSet(offset, 8, 8, ent->viewheight-8);
 	P_ProjectSource (ent->client, ent->s.origin, offset, forward, right, start);
-	fire_rocket (ent, start, forward, damage, 650, damage_radius, radius_damage);
+	//fire_rocket(ent, start, forward, damage, 4, damage_radius, radius_damage);
+	//fire_bfg(ent, start, forward, damage, 600, damage_radius);
+	fire_rocket(ent, start, forward, damage, 650, damage_radius, radius_damage);  //q2mod
 
 	// send muzzle flash
 	gi.WriteByte (svc_muzzleflash);
@@ -789,7 +801,6 @@ void Weapon_RocketLauncher_Fire (edict_t *ent)
 	gi.multicast (ent->s.origin, MULTICAST_PVS);
 
 	ent->client->ps.gunframe++;
-
 	PlayerNoise(ent, start, PNOISE_WEAPON);
 
 	if (! ( (int)dmflags->value & DF_INFINITE_AMMO ) )
@@ -821,6 +832,7 @@ void Blaster_Fire (edict_t *ent, vec3_t g_offset, int damage, qboolean hyper, in
 
 	if (is_quad)
 		damage *= 4;
+
 	AngleVectors (ent->client->v_angle, forward, right, NULL);
 	VectorSet(offset, 24, 8, ent->viewheight-8);
 	VectorAdd (offset, g_offset, offset);
@@ -829,7 +841,9 @@ void Blaster_Fire (edict_t *ent, vec3_t g_offset, int damage, qboolean hyper, in
 	VectorScale (forward, -2, ent->client->kick_origin);
 	ent->client->kick_angles[0] = -1;
 
-	fire_blaster (ent, start, forward, damage, 1000, effect, hyper);
+	
+	//fire_blaster (ent, start, forward, damage, 1000, effect, hyper);
+	fire_bullet(ent, start, forward, damage, 10, 0, 0, 0); //Q2MOD
 
 	// send muzzle flash
 	gi.WriteByte (svc_muzzleflash);
@@ -861,7 +875,10 @@ void Weapon_Blaster (edict_t *ent)
 	static int	pause_frames[]	= {19, 32, 0};
 	static int	fire_frames[]	= {5, 0};
 
-	Weapon_Generic (ent, 4, 8, 52, 55, pause_frames, fire_frames, Weapon_Blaster_Fire);
+//	Weapon_Generic (ent, 4, 8, 52, 55, pause_frames, fire_frames, Weapon_Blaster_Fire);
+	Weapon_Generic (ent, 4, 5, 52, 55, pause_frames, fire_frames, Weapon_Blaster_Fire); //Q2MOD
+//	Weapon_Generic(ent, 4, 12, 50, 54, pause_frames, fire_frames, Weapon_RocketLauncher_Fire);
+
 }
 
 
@@ -1236,19 +1253,19 @@ void Weapon_Shotgun (edict_t *ent)
 }
 
 
-void weapon_supershotgun_fire (edict_t *ent)
+void weapon_supershotgun_fire(edict_t *ent, qboolean hyper, int effect) //Q2MOD
 {
 	vec3_t		start;
 	vec3_t		forward, right;
 	vec3_t		offset;
 	vec3_t		v;
-	int			damage = 6;
+	int			damage = 42;
 	int			kick = 12;
 
 	AngleVectors (ent->client->v_angle, forward, right, NULL);
 
 	VectorScale (forward, -2, ent->client->kick_origin);
-	ent->client->kick_angles[0] = -2;
+	ent->client->kick_angles[0] = -20;
 
 	VectorSet(offset, 0, 8,  ent->viewheight-8);
 	P_ProjectSource (ent->client, ent->s.origin, offset, forward, right, start);
@@ -1263,10 +1280,23 @@ void weapon_supershotgun_fire (edict_t *ent)
 	v[YAW]   = ent->client->v_angle[YAW] - 5;
 	v[ROLL]  = ent->client->v_angle[ROLL];
 	AngleVectors (v, forward, NULL, NULL);
-	fire_shotgun (ent, start, forward, damage, kick, DEFAULT_SHOTGUN_HSPREAD, DEFAULT_SHOTGUN_VSPREAD, DEFAULT_SSHOTGUN_COUNT/2, MOD_SSHOTGUN);
+	//fire_shotgun (ent, start, forward, damage, kick, DEFAULT_SHOTGUN_HSPREAD, DEFAULT_SHOTGUN_VSPREAD, DEFAULT_SSHOTGUN_COUNT/2, MOD_SSHOTGUN);
+	fire_blaster(ent, start, forward, damage, 1000, effect, hyper); //Q2MOD
 	v[YAW]   = ent->client->v_angle[YAW] + 5;
 	AngleVectors (v, forward, NULL, NULL);
-	fire_shotgun (ent, start, forward, damage, kick, DEFAULT_SHOTGUN_HSPREAD, DEFAULT_SHOTGUN_VSPREAD, DEFAULT_SSHOTGUN_COUNT/2, MOD_SSHOTGUN);
+	//fire_shotgun (ent, start, forward, damage, kick, DEFAULT_SHOTGUN_HSPREAD, DEFAULT_SHOTGUN_VSPREAD, DEFAULT_SSHOTGUN_COUNT/2, MOD_SSHOTGUN);
+	fire_blaster (ent, start, forward, damage, 1000, effect, hyper); //Q2MOD
+	v[YAW] = ent->client->v_angle[YAW];
+	AngleVectors(v, forward, NULL, NULL);
+	fire_blaster(ent, start, forward, damage, 1000, effect, hyper); //Q2MOD
+	v[YAW] = ent->client->v_angle[YAW] - 2;
+	AngleVectors(v, forward, NULL, NULL);
+	fire_blaster(ent, start, forward, damage, 1000, effect, hyper); //Q2MOD
+	v[YAW] = ent->client->v_angle[YAW] + 2;
+	AngleVectors(v, forward, NULL, NULL);
+	fire_blaster(ent, start, forward, damage, 1000, effect, hyper); //Q2MOD
+
+
 
 	// send muzzle flash
 	gi.WriteByte (svc_muzzleflash);
@@ -1412,7 +1442,7 @@ void weapon_bfg_fire (edict_t *ent)
 
 	VectorSet(offset, 8, 8, ent->viewheight-8);
 	P_ProjectSource (ent->client, ent->s.origin, offset, forward, right, start);
-	fire_bfg (ent, start, forward, damage, 400, damage_radius);
+	fire_bfg (ent, start, forward, damage, 600, damage_radius);
 
 	ent->client->ps.gunframe++;
 
