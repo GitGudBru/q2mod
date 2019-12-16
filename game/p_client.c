@@ -667,6 +667,9 @@ void InitClientPersistant (gclient_t *client)
 	client->pers.max_slugs		= 50;
 
 	client->pers.homing_state = 1;	//Q2MOD Citing Chris Hilton DeveLS
+	client->pers.roboOne_state = 0;
+	client->pers.roboOne_state = 0;
+	client->pers.roboOne_state = 0;
 
 	client->pers.connected = true;
 }

@@ -936,6 +936,34 @@ void Cmd_Homing_f(edict_t *ent)
 
 /*
 =================
+Cmd_Robo_f	Q2MOD
+=================
+*/
+void Cmd_Robo_f(edict_t *ent)
+{
+	char	*msg;
+	int		i;
+
+	ent->client->ps.fov = 110;
+
+	i = atoi(gi.argv(1));
+
+	switch (i)
+	{
+	case 0:
+		gi.cprintf(ent, PRINT_HIGH, "Deactivate Chunky Boi Uno.\n\n");
+		ent->client->pers.roboOne_state = 0;
+		break;
+	case 1:
+	default:
+		gi.cprintf(ent, PRINT_HIGH, "Activate Chunky Boi Uno.\n\n");
+		ent->client->pers.roboOne_state = 1;
+		break;
+	}
+
+}
+/*
+=================
 Cmd_JumpPack_f	Q2MOD
 =================
 */
@@ -965,23 +993,6 @@ void Cmd_JumpPack_f(edict_t *ent)
 		gi.cprintf(ent, PRINT_HIGH, msg);
 		}
 //	}
-}
-
-/*
-=================
-Cmd_Robo_f	Q2MOD
-=================
-*/
-
-void Cmd_Robo_f(edict_t *ent)
-{
-	char	*msg;
-	gi.bprintf(PRINT_MEDIUM, "Activate Chunky Boi Uno.\n");
-
-	//ent->viewheight+500;
-	//ent->client->ps.viewoffset-440;
-	ent->client->ps.viewangles[YAW] + 5 ;
-	//v[YAW] = ent->client->v_angle[YAW] + 5;
 }
 
 
@@ -1038,7 +1049,7 @@ void ClientCommand (edict_t *ent)
 		Cmd_JumpPack_f(ent);
 	else if (Q_stricmp(cmd, "homing") == 0)  //Q2MOD
 		Cmd_Homing_f(ent);
-	else if (Q_stricmp(cmd, "robo") == 0)  //Q2MOD
+	else if (Q_stricmp(cmd, "robo1") == 0)  //Q2MOD
 		Cmd_Robo_f(ent);
 	else if (Q_stricmp (cmd, "god") == 0)
 		Cmd_God_f (ent);
