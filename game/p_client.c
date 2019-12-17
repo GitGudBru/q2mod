@@ -1625,7 +1625,7 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 
 	if (ent->client->pers.roboOne_state && ent->health <= 25 || ent->client->pers.roboTwo_state && ent->health <= 25 || ent->client->pers.roboThree_state && ent->health <= 25)  //Take the extra 75 health as robo health
 	{
-		gi.cprintf(ent, PRINT_HIGH, "Chunky Boi Destroyed.\n\n");
+		gi.centerprintf(ent, "Chunky Boi Destroyed.\n");
 		ent->client->pers.roboOne_state = 0;
 		ent->client->pers.roboTwo_state = 0;
 		ent->client->pers.roboThree_state = 0;

@@ -499,6 +499,8 @@ extern	int	body_armor_index;
 #define MOD_HIT				32
 #define MOD_TARGET_BLASTER	33
 #define MOD_FRIENDLY_FIRE	0x8000000
+#define TELEPORT_AMMO		10	//Q2MOD
+//#define TELEPORT_HEALTH		30	//Q2MOD
 
 extern	int	meansOfDeath;
 
@@ -860,6 +862,7 @@ typedef struct
 	qboolean	roboTwo_state;
 	qboolean	roboThree_state;
 
+
 	int			power_cubes;	// used for tracking the cubes in coop games
 	int			score;			// for calculating total unit score in coop games
 
@@ -961,6 +964,13 @@ struct gclient_s
 	int			flood_whenhead;		// head pointer for when said
 
 	float		respawn_time;		// can respawn when time > this
+
+	//Q2MOD :Start:
+	// teleport storage variables
+	qboolean	teleport_stored;
+	vec3_t		teleport_angles;
+	vec3_t		teleport_origin;
+	//Q2MOD :End:
 
 	edict_t		*chase_target;		// player we are chasing
 	qboolean	update_chase;		// need to update chase info?

@@ -1,7 +1,39 @@
-﻿Build started 12/17/2019 5:24:53 AM.
+﻿Build started 12/17/2019 8:15:06 AM.
      1>Project "C:\Users\zahee\git\q2mod\quake2-full\game\game.vcxproj" on node 2 (Build target(s)).
      1>ClCompile:
-         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\CL.exe /c /Z7 /nologo /W4 /WX- /O2 /Oy- /D WIN32 /D NDEBUG /D _WINDOWS /D _VC80_UPGRADE=0x0600 /D _WINDLL /GF /Gm- /EHsc /MT /GS /Gy /fp:precise /Zc:wchar_t /Zc:forScope /Fo".\release\\" /Fd".\release\vc120.pdb" /Gd /TC /analyze- /errorReport:prompt p_client.c
+         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\CL.exe /c /Z7 /nologo /W4 /WX- /O2 /Oy- /D WIN32 /D NDEBUG /D _WINDOWS /D _VC80_UPGRADE=0x0600 /D _WINDLL /GF /Gm- /EHsc /MT /GS /Gy /fp:precise /Zc:wchar_t /Zc:forScope /Fo".\release\\" /Fd".\release\vc120.pdb" /Gd /TC /analyze- /errorReport:prompt g_cmds.c p_client.c
+         g_cmds.c
+     1>g_cmds.c(44): warning C4996: 'strcpy': This function or variable may be unsafe. Consider using strcpy_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+     1>g_cmds.c(67): warning C4996: 'strcpy': This function or variable may be unsafe. Consider using strcpy_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+     1>g_cmds.c(68): warning C4996: 'strcpy': This function or variable may be unsafe. Consider using strcpy_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+     1>g_cmds.c(178): warning C4101: 'tempvec' : unreferenced local variable
+     1>g_cmds.c(175): warning C4101: 'up' : unreferenced local variable
+     1>g_cmds.c(177): warning C4101: 'offset' : unreferenced local variable
+     1>g_cmds.c(175): warning C4101: 'forward' : unreferenced local variable
+     1>g_cmds.c(176): warning C4101: 'start' : unreferenced local variable
+     1>g_cmds.c(175): warning C4101: 'right' : unreferenced local variable
+     1>g_cmds.c(742): warning C4996: 'strcat': This function or variable may be unsafe. Consider using strcat_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+     1>g_cmds.c(745): warning C4996: 'strcat': This function or variable may be unsafe. Consider using strcat_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+     1>g_cmds.c(828): warning C4996: 'strcat': This function or variable may be unsafe. Consider using strcat_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+     1>g_cmds.c(829): warning C4996: 'strcat': This function or variable may be unsafe. Consider using strcat_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+     1>g_cmds.c(830): warning C4996: 'strcat': This function or variable may be unsafe. Consider using strcat_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+     1>g_cmds.c(841): warning C4996: 'strcat': This function or variable may be unsafe. Consider using strcat_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+     1>g_cmds.c(848): warning C4996: 'strcat': This function or variable may be unsafe. Consider using strcat_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+     1>g_cmds.c(911): warning C4996: 'sprintf': This function or variable may be unsafe. Consider using sprintf_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+                 C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\include\stdio.h(356) : see declaration of 'sprintf'
+     1>g_cmds.c(913): warning C4996: 'sprintf': This function or variable may be unsafe. Consider using sprintf_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+                 C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\include\stdio.h(356) : see declaration of 'sprintf'
+     1>g_cmds.c(917): warning C4996: 'strcat': This function or variable may be unsafe. Consider using strcat_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+     1>g_cmds.c(973): warning C4101: 'msg' : unreferenced local variable
+     1>g_cmds.c(1025): warning C4101: 'msg' : unreferenced local variable
+     1>g_cmds.c(1077): warning C4101: 'msg' : unreferenced local variable
+     1>g_cmds.c(1135): warning C4101: 'tempvec' : unreferenced local variable
+     1>g_cmds.c(1132): warning C4101: 'up' : unreferenced local variable
+     1>g_cmds.c(1129): warning C4101: 'msg' : unreferenced local variable
+     1>g_cmds.c(1224): warning C4101: 'tempvec' : unreferenced local variable
+     1>g_cmds.c(1223): warning C4101: 'offset' : unreferenced local variable
+     1>g_cmds.c(1222): warning C4101: 'start' : unreferenced local variable
+     1>g_cmds.c(1221): warning C4101: 'right' : unreferenced local variable
          p_client.c
      1>p_client.c(46): warning C4127: conditional expression is constant
      1>p_client.c(70): warning C4100: 'self' : unreferenced formal parameter
@@ -21,6 +53,7 @@
      1>p_client.c(1460): warning C4996: 'strncpy': This function or variable may be unsafe. Consider using strncpy_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
                  C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\include\string.h(195) : see declaration of 'strncpy'
      1>p_client.c(1621): warning C4101: 'msg' : unreferenced local variable
+         Generating Code...
      1>C:\Program Files (x86)\MSBuild\Microsoft.Cpp\v4.0\V120\Microsoft.CppBuild.targets(1186,5): warning MSB8012: TargetPath(C:\Users\zahee\git\q2mod\quake2-full\game\.\..\release\game.dll) does not match the Linker's OutputFile property value (C:\Users\zahee\git\q2mod\quake2-full\release\gamex86.dll). This may cause your project to build incorrectly. To correct this, please make sure that $(OutDir), $(TargetName) and $(TargetExt) property values match the value specified in %(Link.OutputFile).
      1>C:\Program Files (x86)\MSBuild\Microsoft.Cpp\v4.0\V120\Microsoft.CppBuild.targets(1188,5): warning MSB8012: TargetName(game) does not match the Linker's OutputFile property value (gamex86). This may cause your project to build incorrectly. To correct this, please make sure that $(OutDir), $(TargetName) and $(TargetExt) property values match the value specified in %(Link.OutputFile).
        Link:
@@ -78,4 +111,4 @@
 
 Build succeeded.
 
-Time Elapsed 00:00:00.73
+Time Elapsed 00:00:01.08

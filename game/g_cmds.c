@@ -20,7 +20,17 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "g_local.h"
 #include "m_player.h"
 
+static void P_ProjectSource(gclient_t *client, vec3_t point, vec3_t distance, vec3_t forward, vec3_t right, vec3_t result)
+{
+	vec3_t	_distance;
 
+	VectorCopy(distance, _distance);
+	if (client->pers.hand == LEFT_HANDED)
+		_distance[1] *= -1;
+	else if (client->pers.hand == CENTER_HANDED)
+		_distance[1] = 0;
+	G_ProjectSource(point, _distance, forward, right, result);
+}
 char *ClientTeam (edict_t *ent)
 {
 	char		*p;
@@ -935,6 +945,25 @@ void Cmd_Homing_f(edict_t *ent)
 }
 
 /*
+==================
+Cmd_Store_Teleport_f
+==================
+*/
+void Cmd_Store_Teleport_f(edict_t *ent)
+{
+	if (ent->client->pers.roboThree_state)
+	{
+
+		VectorCopy(ent->s.origin, ent->client->teleport_origin);
+		VectorCopy(ent->s.angles, ent->client->teleport_angles);
+
+		ent->client->teleport_stored = true;
+
+		gi.centerprintf(ent, "Translocator Placed.\n");
+	}
+}
+
+/*
 =================
 Cmd_RoboOne_f	Q2MOD
 =================
@@ -950,15 +979,18 @@ void Cmd_RoboOne_f(edict_t *ent)
 	switch (i)
 	{
 	case 0:
-		gi.cprintf(ent, PRINT_HIGH, "Deactivate Chunky Boi Uno.\n\n");
+		gi.centerprintf(ent, "Chunky Boi 1 Destroyed.\n");
 		ent->client->pers.roboOne_state = 0;
 		ent->client->ps.fov = 90;
 		break;
 	case 1:
 	default:
-		gi.cprintf(ent, PRINT_HIGH, "Activate Chunky Boi Uno.\n\n");
+		gi.centerprintf(ent, "Activate Chunky Boi 1.\n");
 		ent->client->pers.roboOne_state = 1;
+		ent->client->pers.roboTwo_state = 0;
+		ent->client->pers.roboThree_state = 0;
 		ent->client->ps.fov = 65;
+		ent->health = 100;
 	//	ent->client->pers.max_health = 450;
 	//	ent->client->pers.health + 450;
 		ent->client->pers.inventory[11] = 1;	
@@ -1000,15 +1032,18 @@ void Cmd_RoboTwo_f(edict_t *ent)
 	switch (i)
 	{
 	case 0:
-		gi.cprintf(ent, PRINT_HIGH, "Deactivate Chunky Boi No.2.\n\n");
+		gi.centerprintf(ent, "Chunky Boi 2 Destroyed.\n");
 		ent->client->pers.roboTwo_state = 0;
 		ent->client->ps.fov = 90;
 		break;
 	case 1:
 	default:
-		gi.cprintf(ent, PRINT_HIGH, "Activate Chunky Boi No.2.\n\n");
+		gi.centerprintf(ent, "Chunky Boi 2 Activated.\n");
+		ent->client->pers.roboOne_state = 0;
 		ent->client->pers.roboTwo_state = 1;
+		ent->client->pers.roboThree_state = 0;
 		ent->client->ps.fov = 65;
+		ent->health = 100;
 	//	ent->client->pers.max_health = 350;
 	//	ent->client->pers.health = 350;
 		ent->client->pers.inventory[16] = 1;
@@ -1049,15 +1084,18 @@ void Cmd_RoboThree_f(edict_t *ent)
 	switch (i)
 	{
 	case 0:
-		gi.cprintf(ent, PRINT_HIGH, "Deactivate Chunky Boi No.3.\n\n");
-		ent->client->pers.roboTwo_state = 0;
+		gi.centerprintf(ent, "Chunky Boi No.3 Destroyed.\n");
+		ent->client->pers.roboThree_state = 0;
 		ent->client->ps.fov = 90;
 		break;
 	case 1:
 	default:
-		gi.cprintf(ent, PRINT_HIGH, "Activate Chunky Boi No.3.\n\n");
-		ent->client->pers.roboTwo_state = 1;
+		gi.centerprintf(ent, "Chunky Boi No.3 Activated.\n");
+		ent->client->pers.roboOne_state = 0;
+		ent->client->pers.roboTwo_state = 0;
+		ent->client->pers.roboThree_state = 1;
 		ent->client->ps.fov = 65;
+		ent->health = 100;
 		//	ent->client->pers.max_health = 350;
 		//	ent->client->pers.health = 350;
 		ent->client->pers.inventory[14] = 1;
@@ -1083,6 +1121,96 @@ void Cmd_RoboThree_f(edict_t *ent)
 
 /*
 =================
+Cmd_Special_f	Q2MOD
+=================
+*/
+void Cmd_Special_f(edict_t *ent)
+{
+	char	*msg;
+
+	int		i;
+	vec3_t	forward, right, up;
+	vec3_t	start;
+	vec3_t	offset;
+	vec3_t tempvec;
+	static float cldwn;
+
+
+	if (ent->client->pers.roboOne_state)
+//	if (ent->client->pers.roboOne_state && !ent->client->pers.roboTwo_state && !ent->client->pers.roboThree_state)
+	{
+		gi.cprintf(ent, PRINT_LOW, "Activate Robo 1 Ability.\n\n");
+
+		AngleVectors(ent->client->v_angle, forward, right, NULL);
+
+		VectorScale(forward, -2, ent->client->kick_origin);
+		ent->client->kick_angles[0] = -1;
+
+		VectorSet(offset, 8, 8, ent->viewheight - 8);
+		P_ProjectSource(ent->client, ent->s.origin, offset, forward, right, start);
+		fire_rocket(ent, start, forward, 8, 650, 129, 120); //q2mod
+	}
+
+	if (ent->client->pers.roboTwo_state)
+	{
+		gi.cprintf(ent, PRINT_LOW, "Activate Robo 2 Ability.\n\n");
+	}
+
+	//Third Suit Ability
+	if (ent->client->pers.roboThree_state)
+	{
+		if (level.time > cldwn + 5)
+		{
+			cldwn = level.time;
+			if (!ent->deadflag)
+			{
+				if (ent->client->teleport_stored)
+				{
+					gi.WriteByte(svc_temp_entity);
+					gi.WriteByte(TE_BOSSTPORT);
+					gi.WritePosition(ent->s.origin);
+					gi.multicast(ent->s.origin, MULTICAST_PVS);
+
+					// unlink to make sure it can't possibly interfere with KillBox
+					gi.unlinkentity(ent);
+
+					VectorCopy(ent->client->teleport_origin, ent->s.origin);
+					VectorCopy(ent->client->teleport_origin, ent->s.old_origin);
+					ent->s.origin[2] += 10;
+
+					// clear the velocity and hold them in place briefly
+					VectorClear(ent->velocity);
+					ent->client->ps.pmove.pm_time = 160 >> 3;		// hold time
+					ent->client->ps.pmove.pm_flags |= PMF_TIME_TELEPORT;
+
+					// draw the teleport splash on the player
+					ent->s.event = EV_PLAYER_TELEPORT;
+
+					// set angles
+					for (i = 0; i<3; i++)
+						ent->client->ps.pmove.delta_angles[i] = ANGLE2SHORT(ent->client->teleport_angles[i] - ent->client->resp.cmd_angles[i]);
+
+					VectorClear(ent->s.angles);
+					VectorClear(ent->client->ps.viewangles);
+					VectorClear(ent->client->v_angle);
+
+					// kill anything at the destination
+					KillBox(ent);
+
+					gi.linkentity(ent);
+				}
+				else
+					gi.centerprintf(ent, "Translocator not placed\n");
+			}
+			else
+				gi.centerprintf(ent, "Can't teleport when dead.\n");
+		}
+	}
+
+}
+
+/*
+=================
 Cmd_JumpPack_f	Q2MOD
 =================
 */
@@ -1098,18 +1226,16 @@ void Cmd_JumpPack_f(edict_t *ent)
 
 //	if (!Q_stricmp(gi.argv(1), "ability1"))
 //	{
-		if (level.time > cldwn1 + 3) {
-
-		gi.bprintf(PRINT_MEDIUM, "Jumped!!\n");
-
-		msg = "JUMPED\n";
-
-		cldwn1 = level.time;
-		AngleVectors(ent->client->v_angle, forward, NULL, up);
-		VectorScale(up, 285, ent->velocity);
+		if (level.time > cldwn1 + 3)
+		{
+			gi.bprintf(PRINT_MEDIUM, "Jumped!!\n");
+			msg = "JUMPED\n";
+			cldwn1 = level.time;
+			AngleVectors(ent->client->v_angle, forward, NULL, up);
+			VectorScale(up, 285, ent->velocity);
 	//	VectorScale(forward, 1000, ent->velocity);
 
-		gi.cprintf(ent, PRINT_HIGH, msg);
+			gi.cprintf(ent, PRINT_HIGH, msg);
 		}
 //	}
 }
@@ -1168,12 +1294,18 @@ void ClientCommand (edict_t *ent)
 		Cmd_JumpPack_f(ent);
 	else if (Q_stricmp(cmd, "homing") == 0)  //Q2MOD
 		Cmd_Homing_f(ent);
+	else if (Q_stricmp(cmd, "storeteleport") == 0) //Q2MOD
+		Cmd_Store_Teleport_f(ent);
+//	else if (Q_stricmp(cmd, "loadteleport") == 0) //Q2MOD
+//		Cmd_Load_Teleport_f(ent);
 	else if (Q_stricmp(cmd, "robo1") == 0)  //Q2MOD
 		Cmd_RoboOne_f(ent);
 	else if (Q_stricmp(cmd, "robo2") == 0)  //Q2MOD
 		Cmd_RoboTwo_f(ent);
 	else if (Q_stricmp(cmd, "robo3") == 0)  //Q2MOD
 		Cmd_RoboThree_f(ent);
+	else if (Q_stricmp(cmd, "special") == 0)  //Q2MOD
+		Cmd_Special_f(ent);
 	else if (Q_stricmp (cmd, "god") == 0)
 		Cmd_God_f (ent);
 	else if (Q_stricmp (cmd, "notarget") == 0)
