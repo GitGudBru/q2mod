@@ -7,7 +7,8 @@ as published by the Free Software Foundation; either version 2
 of the License, or (at your option) any later version.
 
 This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
+but WITH
+ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  
 
 See the GNU General Public License for more details.
@@ -455,6 +456,82 @@ static void Grenade_Explode (edict_t *ent)
 	G_FreeEdict (ent);
 }
 
+/*
+static void Cluster_Explode(edict_t *ent)
+
+{
+	vec3_t		origin;
+
+
+	vec3_t   grenade1;
+	vec3_t   grenade2;
+	vec3_t   grenade3;
+	vec3_t   grenade4;
+
+	int			mod;
+
+	if (ent->owner->client)
+		PlayerNoise(ent->owner, ent->s.origin, PNOISE_IMPACT);
+
+	if (ent->enemy)
+	{
+		float	points;
+		vec3_t	v;
+		vec3_t	dir;
+
+		VectorAdd(ent->enemy->mins, ent->enemy->maxs, v);
+		VectorMA(ent->enemy->s.origin, 0.5, v, v);
+		VectorSubtract(ent->s.origin, v, v);
+		points = ent->dmg - 0.5 * VectorLength(v);
+		VectorSubtract(ent->enemy->s.origin, ent->s.origin, dir);
+		if (ent->spawnflags & 1)
+			mod = MOD_HANDGRENADE;
+		else
+			mod = MOD_GRENADE;
+		T_Damage(ent->enemy, ent, ent->owner, dir, ent->s.origin, vec3_origin, (int)points, (int)points, DAMAGE_RADIUS, mod);
+	}
+
+	if (ent->spawnflags & 2)
+		mod = MOD_HELD_GRENADE;
+	else if (ent->spawnflags & 1)
+		mod = MOD_HG_SPLASH;
+	else
+		mod = MOD_G_SPLASH;
+
+	T_RadiusDamage(ent, ent->owner, ent->dmg, NULL, ent->dmg_radius, mod);
+
+	VectorMA(ent->s.origin, -0.02, ent->velocity, origin);
+	gi.WriteByte(svc_temp_entity);
+	if (ent->waterlevel)
+	{
+		if (ent->groundentity)
+			gi.WriteByte(TE_GRENADE_EXPLOSION_WATER);
+		else
+			gi.WriteByte(TE_ROCKET_EXPLOSION_WATER);
+	}
+	else
+	{
+		if (ent->groundentity)
+			gi.WriteByte(TE_GRENADE_EXPLOSION);
+		else
+			gi.WriteByte(TE_ROCKET_EXPLOSION);
+	}
+	gi.WritePosition(origin);
+	gi.multicast(ent->s.origin, MULTICAST_PVS);
+
+	VectorSet(grenade1, 20, 20, 40);
+	VectorSet(grenade2, 20, -20, 40);
+	VectorSet(grenade3, -20, 20, 40);
+	VectorSet(grenade4, -20, -20, 40);
+
+	fire_grenade2(ent, origin, grenade1, 120, 10, 1.0, 120, mod);
+	fire_grenade2(ent, origin, grenade2, 120, 10, 1.0, 120, mod);
+	fire_grenade2(ent, origin, grenade3, 120, 10, 1.0, 120, mod);
+	fire_grenade2(ent, origin, grenade4, 120, 10, 1.0, 120, mod);
+
+	G_FreeEdict(ent);
+}
+*/
 static void Grenade_Touch (edict_t *ent, edict_t *other, cplane_t *plane, csurface_t *surf)
 {
 	if (other == ent->owner)

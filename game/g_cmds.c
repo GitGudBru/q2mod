@@ -982,6 +982,7 @@ void Cmd_RoboOne_f(edict_t *ent)
 		gi.centerprintf(ent, "Chunky Boi 1 Destroyed.\n");
 		ent->client->pers.roboOne_state = 0;
 		ent->client->ps.fov = 90;
+		//ent->client->pers.inventory[11] = 0;
 		break;
 	case 1:
 	default:
@@ -990,7 +991,7 @@ void Cmd_RoboOne_f(edict_t *ent)
 		ent->client->pers.roboTwo_state = 0;
 		ent->client->pers.roboThree_state = 0;
 		ent->client->ps.fov = 65;
-		ent->health = 100;
+		ent->health = 200;
 	//	ent->client->pers.max_health = 450;
 	//	ent->client->pers.health + 450;
 		ent->client->pers.inventory[11] = 1;	
@@ -1034,7 +1035,8 @@ void Cmd_RoboTwo_f(edict_t *ent)
 	case 0:
 		gi.centerprintf(ent, "Chunky Boi 2 Destroyed.\n");
 		ent->client->pers.roboTwo_state = 0;
-		ent->client->ps.fov = 90;
+		ent->client->ps.fov = 90; 
+		//ent->client->pers.inventory[16] = 0;
 		break;
 	case 1:
 	default:
@@ -1043,10 +1045,10 @@ void Cmd_RoboTwo_f(edict_t *ent)
 		ent->client->pers.roboTwo_state = 1;
 		ent->client->pers.roboThree_state = 0;
 		ent->client->ps.fov = 65;
-		ent->health = 100;
+		ent->health = 200;
 	//	ent->client->pers.max_health = 350;
 	//	ent->client->pers.health = 350;
-		ent->client->pers.inventory[16] = 1;
+		ent->client->pers.inventory[15] = 1;
 
 		for (i = 0; i<game.num_items; i++)
 		{
@@ -1087,6 +1089,7 @@ void Cmd_RoboThree_f(edict_t *ent)
 		gi.centerprintf(ent, "Chunky Boi No.3 Destroyed.\n");
 		ent->client->pers.roboThree_state = 0;
 		ent->client->ps.fov = 90;
+		//ent->client->pers.inventory[14] = 0;
 		break;
 	case 1:
 	default:
@@ -1095,10 +1098,10 @@ void Cmd_RoboThree_f(edict_t *ent)
 		ent->client->pers.roboTwo_state = 0;
 		ent->client->pers.roboThree_state = 1;
 		ent->client->ps.fov = 65;
-		ent->health = 100;
+		ent->health = 200;
 		//	ent->client->pers.max_health = 350;
 		//	ent->client->pers.health = 350;
-		ent->client->pers.inventory[14] = 1;
+		ent->client->pers.inventory[16] = 1;
 
 		for (i = 0; i<game.num_items; i++)
 		{
@@ -1129,6 +1132,7 @@ void Cmd_Special_f(edict_t *ent)
 	char	*msg;
 
 	int		i;
+	float timer;
 	vec3_t	forward, right, up;
 	vec3_t	start;
 	vec3_t	offset;
@@ -1154,6 +1158,13 @@ void Cmd_Special_f(edict_t *ent)
 	if (ent->client->pers.roboTwo_state)
 	{
 		gi.cprintf(ent, PRINT_LOW, "Activate Robo 2 Ability.\n\n");
+		VectorSet(offset, 8, 8, ent->viewheight - 8);
+		AngleVectors(ent->client->v_angle, forward, right, NULL);
+		P_ProjectSource(ent->client, ent->s.origin, offset, forward, right, start);
+
+		timer = ent->client->grenade_time - level.time;
+		fire_grenade2(ent, start, forward, 40, 400, timer, 150, false);
+		//ent->health += 40;
 	}
 
 	//Third Suit Ability

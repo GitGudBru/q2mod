@@ -792,6 +792,7 @@ void Weapon_RocketLauncher_Fire (edict_t *ent)
 	P_ProjectSource (ent->client, ent->s.origin, offset, forward, right, start);
 	//fire_rocket(ent, start, forward, damage, 4, damage_radius, radius_damage);
 	//fire_bfg(ent, start, forward, damage, 600, damage_radius);
+
 	fire_rocket(ent, start, forward, damage, 650, damage_radius, radius_damage);  //q2mod
 
 	// send muzzle flash
@@ -857,6 +858,39 @@ void Blaster_Fire (edict_t *ent, vec3_t g_offset, int damage, qboolean hyper, in
 	PlayerNoise(ent, start, PNOISE_WEAPON);
 }
 
+void Blaster_Fire2(edict_t *ent, vec3_t g_offset, int damage, qboolean hyper, int effect)
+{
+	vec3_t	forward, right;
+	vec3_t	start;
+	vec3_t	offset;
+
+	if (is_quad)
+		damage *= 4;
+
+	AngleVectors(ent->client->v_angle, forward, right, NULL);
+	VectorSet(offset, 24, 8, ent->viewheight - 8);
+	VectorAdd(offset, g_offset, offset);
+	P_ProjectSource(ent->client, ent->s.origin, offset, forward, right, start);
+
+	VectorScale(forward, -2, ent->client->kick_origin);
+	ent->client->kick_angles[0] = -1;
+
+
+	fire_blaster(ent, start, forward, damage, 1000, effect, hyper);
+	//fire_bullet(ent, start, forward, damage, 10, 0, 0, 0); //Q2MOD
+
+	// send muzzle flash
+	gi.WriteByte(svc_muzzleflash);
+	gi.WriteShort(ent - g_edicts);
+	if (hyper)
+		gi.WriteByte(MZ_HYPERBLASTER | is_silenced);
+	else
+		gi.WriteByte(MZ_BLASTER | is_silenced);
+	gi.multicast(ent->s.origin, MULTICAST_PVS);
+
+	PlayerNoise(ent, start, PNOISE_WEAPON);
+}
+
 
 void Weapon_Blaster_Fire (edict_t *ent)
 {
@@ -882,12 +916,11 @@ void Weapon_Blaster (edict_t *ent)
 }
 
 
-void Weapon_HyperBlaster_Fire (edict_t *ent)
+void Weapon_HyperBlaster_Fire(edict_t *ent)
 {
 	float	rotation;
 	vec3_t	offset;
 	int		effect;
-	int		damage;
 
 	ent->client->weapon_sound = gi.soundindex("weapons/hyprbl1a.wav");
 
@@ -897,45 +930,47 @@ void Weapon_HyperBlaster_Fire (edict_t *ent)
 	}
 	else
 	{
-		if (! ent->client->pers.inventory[ent->client->ammo_index] )
+		if (!ent->client->pers.inventory[ent->client->ammo_index])
 		{
 			if (level.time >= ent->pain_debounce_time)
 			{
 				gi.sound(ent, CHAN_VOICE, gi.soundindex("weapons/noammo.wav"), 1, ATTN_NORM, 0);
 				ent->pain_debounce_time = level.time + 1;
 			}
-			NoAmmoWeaponChange (ent);
+			NoAmmoWeaponChange(ent);
 		}
 		else
 		{
-			rotation = (ent->client->ps.gunframe - 5) * 2*M_PI/6;
-			offset[0] = -4 * sin(rotation);
-			offset[1] = 0;
-			offset[2] = 4 * cos(rotation);
+			// STEVE .... the lines below are new !
+			// ...........TRIPLE HYPER BLASTER !!!
 
 			if ((ent->client->ps.gunframe == 6) || (ent->client->ps.gunframe == 9))
 				effect = EF_HYPERBLASTER;
 			else
 				effect = 0;
-			if (deathmatch->value)
-				damage = 15;
-			else
-				damage = 20;
-			Blaster_Fire (ent, offset, damage, true, effect);
-			if (! ( (int)dmflags->value & DF_INFINITE_AMMO ) )
-				ent->client->pers.inventory[ent->client->ammo_index]--;
 
-			ent->client->anim_priority = ANIM_ATTACK;
-			if (ent->client->ps.pmove.pm_flags & PMF_DUCKED)
-			{
-				ent->s.frame = FRAME_crattak1 - 1;
-				ent->client->anim_end = FRAME_crattak9;
-			}
-			else
-			{
-				ent->s.frame = FRAME_attack1 - 1;
-				ent->client->anim_end = FRAME_attack8;
-			}
+			// change the offset radius to 6 (from 4), spread the bolts out a little
+			rotation = (ent->client->ps.gunframe - 5) * 2 * M_PI / 6;
+			offset[0] = 0;
+			offset[1] = -8 * sin(rotation);
+			offset[2] = 8 * cos(rotation);
+			Blaster_Fire2(ent, offset, 20, true, effect);
+
+			// fire a second blast at a different rotation
+			rotation = (ent->client->ps.gunframe - 5) * 2 * M_PI / 6 + M_PI*2.0 / 3.0;
+			offset[0] = 0;
+			offset[1] = -8 * sin(rotation);
+			offset[2] = 8 * cos(rotation);
+			Blaster_Fire2(ent, offset, 20, true, effect);
+
+			// fire a third blast at a different rotation
+			rotation = (ent->client->ps.gunframe - 5) * 2 * M_PI / 6 + M_PI*4.0 / 3.0;
+			offset[0] = 0;
+			offset[1] = -8 * sin(rotation);
+			offset[2] = 8 * cos(rotation);
+			Blaster_Fire2(ent, offset, 20, true, effect);
+			// deduct 3 times the amount of ammo as before (... the *3 on end)
+			ent->client->pers.inventory[ent->client->ammo_index] -= ent->client->pers.weapon->quantity * 3;
 		}
 
 		ent->client->ps.gunframe++;
@@ -955,8 +990,16 @@ void Weapon_HyperBlaster (edict_t *ent)
 {
 	static int	pause_frames[]	= {0};
 	static int	fire_frames[]	= {6, 7, 8, 9, 10, 11, 0};
-
-	Weapon_Generic (ent, 5, 20, 49, 53, pause_frames, fire_frames, Weapon_HyperBlaster_Fire);
+	/*
+	if (!ent->client->pers.roboTwo_state)
+	{
+		return;
+	}
+	else
+	{
+	*/
+		Weapon_Generic(ent, 5, 20, 49, 53, pause_frames, fire_frames, Weapon_HyperBlaster_Fire);
+//	}
 }
 
 /*
@@ -1185,8 +1228,19 @@ void Weapon_Chaingun (edict_t *ent)
 {
 	static int	pause_frames[]	= {38, 43, 51, 61, 0};
 	static int	fire_frames[]	= {5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 0};
+	/*
+	if (!ent->client->pers.roboOne_state)
+	{
+		return;
+	}
+	else
+	{
+*/
+		Weapon_Generic(ent, 4, 31, 61, 64, pause_frames, fire_frames, Chaingun_Fire);
 
-	Weapon_Generic (ent, 4, 31, 61, 64, pause_frames, fire_frames, Chaingun_Fire);
+//	}
+
+//	Weapon_Generic (ent, 4, 31, 61, 64, pause_frames, fire_frames, Chaingun_Fire);
 }
 
 
@@ -1381,8 +1435,16 @@ void Weapon_Railgun (edict_t *ent)
 {
 	static int	pause_frames[]	= {56, 0};
 	static int	fire_frames[]	= {4, 0};
-
-	Weapon_Generic (ent, 3, 18, 56, 61, pause_frames, fire_frames, weapon_railgun_fire);
+	/*
+	if (!ent->client->pers.roboThree_state)
+	{
+		return;
+	}
+	else
+	{
+	*/
+		Weapon_Generic(ent, 3, 18, 56, 61, pause_frames, fire_frames, weapon_railgun_fire);
+//	}
 }
 
 
