@@ -668,8 +668,8 @@ void InitClientPersistant (gclient_t *client)
 
 	client->pers.homing_state = 1;	//Q2MOD Citing Chris Hilton DeveLS
 	client->pers.roboOne_state = 0;
-	client->pers.roboOne_state = 0;
-	client->pers.roboOne_state = 0;
+	client->pers.roboTwo_state = 0;
+	client->pers.roboThree_state = 0;
 
 	client->pers.connected = true;
 }
@@ -1618,10 +1618,33 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 	edict_t	*other;
 	int		i, j;
 	pmove_t	pm;
+	char	*msg;
 
 	level.current_entity = ent;
 	client = ent->client;
 
+	if (ent->client->pers.roboOne_state && ent->health <= 25 || ent->client->pers.roboTwo_state && ent->health <= 25 || ent->client->pers.roboThree_state && ent->health <= 25)  //Take the extra 75 health as robo health
+	{
+		gi.cprintf(ent, PRINT_HIGH, "Chunky Boi Destroyed.\n\n");
+		ent->client->pers.roboOne_state = 0;
+		ent->client->pers.roboTwo_state = 0;
+		ent->client->pers.roboThree_state = 0;
+		ent->health = 100;
+	}
+	/*
+	if (ent->client->pers.roboTwo_state && ent->health <= 25)  //Take the extra 75 health as robo health
+	{
+		gi.cprintf(ent, PRINT_HIGH, "Chunky Boi Destroyed.\n\n");
+		ent->client->pers.roboTwo_state = 0;
+		ent->health = 100;
+	}
+	if (ent->client->pers.roboThree_state && ent->health <= 25)  //Take the extra 75 health as robo health
+	{
+		gi.cprintf(ent, PRINT_HIGH, "Chunky Boi Destroyed.\n\n");
+		ent->client->pers.roboOne_state = 0;
+		ent->health = 100;
+	}
+		*/
 	if (level.intermissiontime)
 	{
 		client->ps.pmove.pm_type = PM_FREEZE;

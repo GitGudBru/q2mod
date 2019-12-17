@@ -936,15 +936,14 @@ void Cmd_Homing_f(edict_t *ent)
 
 /*
 =================
-Cmd_Robo_f	Q2MOD
+Cmd_RoboOne_f	Q2MOD
 =================
 */
-void Cmd_Robo_f(edict_t *ent)
+void Cmd_RoboOne_f(edict_t *ent)
 {
 	char	*msg;
 	int		i;
-
-	ent->client->ps.fov = 110;
+	gitem_t		*item;
 
 	i = atoi(gi.argv(1));
 
@@ -953,15 +952,135 @@ void Cmd_Robo_f(edict_t *ent)
 	case 0:
 		gi.cprintf(ent, PRINT_HIGH, "Deactivate Chunky Boi Uno.\n\n");
 		ent->client->pers.roboOne_state = 0;
+		ent->client->ps.fov = 90;
 		break;
 	case 1:
 	default:
 		gi.cprintf(ent, PRINT_HIGH, "Activate Chunky Boi Uno.\n\n");
 		ent->client->pers.roboOne_state = 1;
+		ent->client->ps.fov = 65;
+	//	ent->client->pers.max_health = 450;
+	//	ent->client->pers.health + 450;
+		ent->client->pers.inventory[11] = 1;	
+		
+		for (i = 0; i<game.num_items; i++)
+		{
+			item = itemlist + i;
+			if (!item->pickup)
+				continue;
+			if (!(item->flags & IT_AMMO))
+				continue;
+			Add_Ammo(ent, item, 1000);
+		}
+
+	//	item = FindItem("Combat Armor");
+	//	ent->client->pers.inventory[ITEM_INDEX(item)] = 0;
+		
+		//ent->client->pers.max_bullets;
+	//	Add_Ammo(ent, ent->client->pers.inventory[ITEM_INDEX(FindItem("slugs"))], 1000);
 		break;
 	}
 
 }
+
+/*
+=================
+Cmd_RoboTwo_f	Q2MOD
+=================
+*/
+void Cmd_RoboTwo_f(edict_t *ent)
+{
+	char	*msg;
+	int		i;
+	gitem_t		*item;
+
+
+	i = atoi(gi.argv(1));
+
+	switch (i)
+	{
+	case 0:
+		gi.cprintf(ent, PRINT_HIGH, "Deactivate Chunky Boi No.2.\n\n");
+		ent->client->pers.roboTwo_state = 0;
+		ent->client->ps.fov = 90;
+		break;
+	case 1:
+	default:
+		gi.cprintf(ent, PRINT_HIGH, "Activate Chunky Boi No.2.\n\n");
+		ent->client->pers.roboTwo_state = 1;
+		ent->client->ps.fov = 65;
+	//	ent->client->pers.max_health = 350;
+	//	ent->client->pers.health = 350;
+		ent->client->pers.inventory[16] = 1;
+
+		for (i = 0; i<game.num_items; i++)
+		{
+			item = itemlist + i;
+			if (!item->pickup)
+				continue;
+			if (!(item->flags & IT_AMMO))
+				continue;
+			Add_Ammo(ent, item, 1000);
+		}
+
+	//	item = FindItem("Combat Armor");
+	//	ent->client->pers.inventory[ITEM_INDEX(item)] = 0;
+
+		//ent->client->pers.max_bullets;
+		//	Add_Ammo(ent, ent->client->pers.inventory[ITEM_INDEX(FindItem("slugs"))], 1000);
+		break;
+	}
+}
+
+/*
+=================
+Cmd_RoboThree_f	Q2MOD
+=================
+*/
+void Cmd_RoboThree_f(edict_t *ent)
+{
+	char	*msg;
+	int		i;
+	gitem_t		*item;
+
+
+	i = atoi(gi.argv(1));
+
+	switch (i)
+	{
+	case 0:
+		gi.cprintf(ent, PRINT_HIGH, "Deactivate Chunky Boi No.3.\n\n");
+		ent->client->pers.roboTwo_state = 0;
+		ent->client->ps.fov = 90;
+		break;
+	case 1:
+	default:
+		gi.cprintf(ent, PRINT_HIGH, "Activate Chunky Boi No.3.\n\n");
+		ent->client->pers.roboTwo_state = 1;
+		ent->client->ps.fov = 65;
+		//	ent->client->pers.max_health = 350;
+		//	ent->client->pers.health = 350;
+		ent->client->pers.inventory[14] = 1;
+
+		for (i = 0; i<game.num_items; i++)
+		{
+			item = itemlist + i;
+			if (!item->pickup)
+				continue;
+			if (!(item->flags & IT_AMMO))
+				continue;
+			Add_Ammo(ent, item, 1000);
+		}
+
+		//	item = FindItem("Combat Armor");
+		//	ent->client->pers.inventory[ITEM_INDEX(item)] = 0;
+
+		//ent->client->pers.max_bullets;
+		//	Add_Ammo(ent, ent->client->pers.inventory[ITEM_INDEX(FindItem("slugs"))], 1000);
+		break;
+	}
+}
+
 /*
 =================
 Cmd_JumpPack_f	Q2MOD
@@ -1050,7 +1169,11 @@ void ClientCommand (edict_t *ent)
 	else if (Q_stricmp(cmd, "homing") == 0)  //Q2MOD
 		Cmd_Homing_f(ent);
 	else if (Q_stricmp(cmd, "robo1") == 0)  //Q2MOD
-		Cmd_Robo_f(ent);
+		Cmd_RoboOne_f(ent);
+	else if (Q_stricmp(cmd, "robo2") == 0)  //Q2MOD
+		Cmd_RoboTwo_f(ent);
+	else if (Q_stricmp(cmd, "robo3") == 0)  //Q2MOD
+		Cmd_RoboThree_f(ent);
 	else if (Q_stricmp (cmd, "god") == 0)
 		Cmd_God_f (ent);
 	else if (Q_stricmp (cmd, "notarget") == 0)
