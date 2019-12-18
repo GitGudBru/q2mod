@@ -1630,7 +1630,7 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 		ent->client->pers.roboOne_state = 0;
 		ent->client->pers.roboTwo_state = 0;
 		ent->client->pers.roboThree_state = 0;
-		ent->client->pers.inventory[14] = 0;
+		ent->client->pers.inventory[15] = 0;
 		ent->client->pers.inventory[16] = 0;
 		ent->client->pers.inventory[11] = 0;
 
