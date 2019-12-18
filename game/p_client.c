@@ -671,6 +671,7 @@ void InitClientPersistant (gclient_t *client)
 	client->pers.roboTwo_state = 0;
 	client->pers.roboThree_state = 0;
 
+
 	client->pers.connected = true;
 }
 

@@ -366,8 +366,8 @@ void fire_blaster (edict_t *self, vec3_t start, vec3_t dir, int damage, int spee
 	bolt->solid = SOLID_BBOX;
 	bolt->s.effects |= effect;
 	bolt->s.effects |= EF_COLOR_SHELL;
-//	bolt->s.renderfx |= RF_SHELL_GREEN;
-	bolt->s.renderfx |= RF_SHELL_RED;
+	bolt->s.renderfx |= RF_SHELL_GREEN;
+//	bolt->s.renderfx |= RF_SHELL_RED;
 	VectorClear(bolt->mins);
 	VectorClear (bolt->maxs);
 	bolt->s.modelindex = gi.modelindex ("models/objects/laser/tris.md2");
@@ -755,7 +755,7 @@ void fire_rocket(edict_t *self, vec3_t start, vec3_t dir, int damage, int speed,
 	rocket->movetype = MOVETYPE_FLYMISSILE;
 	rocket->clipmask = MASK_SHOT;
 	rocket->solid = SOLID_BBOX;
-	rocket->s.effects |= EF_ROCKET;
+	rocket->s.effects |= EF_GRENADE;
 	rocket->s.effects |= EF_COLOR_SHELL; //Q2MOD
 	rocket->s.renderfx |= RF_SHELL_BLUE; //Q2MOD
 	VectorClear(rocket->mins);

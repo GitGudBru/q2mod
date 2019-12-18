@@ -31,6 +31,37 @@ static void P_ProjectSource(gclient_t *client, vec3_t point, vec3_t distance, ve
 		_distance[1] = 0;
 	G_ProjectSource(point, _distance, forward, right, result);
 }
+edict_t *FindMonster(edict_t *self)
+{
+	edict_t	*ent = NULL;
+	edict_t	*best = NULL;
+
+	while ((ent = findradius(ent, self->s.origin, 1024)) != NULL)
+	{
+		if (ent == self)
+			continue;
+		if (!(ent->svflags & SVF_MONSTER))
+			continue;
+		if (!ent->health)
+			continue;
+		if (ent->health < 1)
+			continue;
+		if (!visible(self, ent))
+			continue;
+		if (!best)
+		{
+			best = ent;
+			continue;
+		}
+		if (ent->max_health <= best->max_health)
+			continue;
+		best = ent;
+	}
+
+	return best;
+}
+
+
 char *ClientTeam (edict_t *ent)
 {
 	char		*p;
@@ -964,6 +995,31 @@ void Cmd_Store_Teleport_f(edict_t *ent)
 }
 
 /*
+= == == == == == == == ==
+Cmd_Push_f					Q2MOD ----------- If Push Wants to be added -----------
+= == == == == == == == ==
+*/
+/*
+void Cmd_Push_f(edict_t *ent)
+{
+	vec3_t	start;
+	vec3_t	forward;
+	vec3_t	end;
+	trace_t	tr;
+	
+	VectorCopy(ent->s.origin, start);
+	start[2] += ent->viewheight;
+	AngleVectors(ent->client->v_angle, forward, NULL, NULL);
+	VectorMA(start, 8192, forward, end);
+	tr = gi.trace(start, NULL, NULL, end, ent, MASK_SHOT);
+	if (tr.ent && ((tr.ent->svflags & SVF_MONSTER) || (tr.ent->client)))
+	{
+		VectorScale(forward, 8000, forward);
+		VectorAdd(forward, tr.ent->velocity, tr.ent->velocity);
+	}
+}
+*/
+/*
 =================
 Cmd_RoboOne_f	Q2MOD
 =================
@@ -990,6 +1046,7 @@ void Cmd_RoboOne_f(edict_t *ent)
 		ent->client->pers.roboOne_state = 1;
 		ent->client->pers.roboTwo_state = 0;
 		ent->client->pers.roboThree_state = 0;
+
 		ent->client->ps.fov = 65;
 		ent->health = 200;
 	//	ent->client->pers.max_health = 450;
@@ -1124,6 +1181,45 @@ void Cmd_RoboThree_f(edict_t *ent)
 
 /*
 =================
+Cmd_SpawnFriend_f	Q2MOD
+=================
+*/
+
+void Cmd_SpawnFriend_f(edict_t *ent)
+{
+	static edict_t *pet = NULL;
+
+	if (ent->client->pers.roboOne_state || ent->client->pers.roboTwo_state || ent->client->pers.roboThree_state)
+	{
+		//static edict_t *pet = NULL;
+		if (!pet || pet->health <= 0)
+		{
+			pet = G_Spawn();
+			Com_Printf("Auto Pilot Initiated");
+			//ent->client->pers.roboOne_state = 0;
+			//ent->client->pers.roboTwo_state = 0;
+			//ent->client->pers.roboThree_state = 0;
+			ent->health = 100;
+			ent->client->ps.fov = 90;
+			ent->client->pers.inventory[14] = 0;
+			ent->client->pers.inventory[16] = 0;
+			ent->client->pers.inventory[11] = 0;
+		//	pet->s.renderfx |= EF_QUAD;		//Q2MOD
+			VectorSet(pet->s.origin, ent->s.origin[0], ent->s.origin[1], ent->s.origin[2]);
+			SP_monster_tank(pet);
+			vec3_t upward_left = { 0, 50, 0 };
+
+			VectorAdd(pet->s.origin, upward_left, pet->s.origin);
+			pet->roboFriend = 1;
+			return pet;
+		}
+	//	return pet;
+	}
+	return pet;
+}
+
+/*
+=================
 Cmd_Special_f	Q2MOD
 =================
 */
@@ -1135,36 +1231,37 @@ void Cmd_Special_f(edict_t *ent)
 	float timer;
 	vec3_t	forward, right, up;
 	vec3_t	start;
+	vec3_t	end;
 	vec3_t	offset;
 	vec3_t tempvec;
+	trace_t	tr;
 	static float cldwn;
 
 
 	if (ent->client->pers.roboOne_state)
 //	if (ent->client->pers.roboOne_state && !ent->client->pers.roboTwo_state && !ent->client->pers.roboThree_state)
 	{
-		gi.cprintf(ent, PRINT_LOW, "Activate Robo 1 Ability.\n\n");
-
-		AngleVectors(ent->client->v_angle, forward, right, NULL);
-
-		VectorScale(forward, -2, ent->client->kick_origin);
-		ent->client->kick_angles[0] = -1;
-
-		VectorSet(offset, 8, 8, ent->viewheight - 8);
-		P_ProjectSource(ent->client, ent->s.origin, offset, forward, right, start);
-		fire_rocket(ent, start, forward, 8, 650, 129, 120); //q2mod
-	}
-
-	if (ent->client->pers.roboTwo_state)
-	{
-		gi.cprintf(ent, PRINT_LOW, "Activate Robo 2 Ability.\n\n");
 		VectorSet(offset, 8, 8, ent->viewheight - 8);
 		AngleVectors(ent->client->v_angle, forward, right, NULL);
 		P_ProjectSource(ent->client, ent->s.origin, offset, forward, right, start);
 
 		timer = ent->client->grenade_time - level.time;
-		fire_grenade2(ent, start, forward, 40, 400, timer, 150, false);
-		//ent->health += 40;
+		fire_grenade2(ent, start, forward, 120, 400, timer, 350, false);
+		ent->health += 56;
+	}
+
+	if (ent->client->pers.roboTwo_state)
+	{
+		VectorCopy(ent->s.origin, start);
+		start[2] += ent->viewheight;
+		AngleVectors(ent->client->v_angle, forward, NULL, NULL);
+		VectorMA(start, 8192, forward, end);
+		tr = gi.trace(start, NULL, NULL, end, ent, MASK_SHOT);
+		if (tr.ent && ((tr.ent->svflags & SVF_MONSTER) || (tr.ent->client)))
+		{
+			VectorScale(forward, -5000, forward);
+			VectorAdd(forward, tr.ent->velocity, tr.ent->velocity);
+		}
 	}
 
 	//Third Suit Ability
@@ -1251,7 +1348,6 @@ void Cmd_JumpPack_f(edict_t *ent)
 //	}
 }
 
-
 /*
 =================
 ClientCommand
@@ -1260,6 +1356,7 @@ ClientCommand
 void ClientCommand (edict_t *ent)
 {
 	char	*cmd;
+	static edict_t *pet = NULL;
 
 	if (!ent->client)
 		return;		// not fully in game yet
@@ -1307,6 +1404,8 @@ void ClientCommand (edict_t *ent)
 		Cmd_Homing_f(ent);
 	else if (Q_stricmp(cmd, "storeteleport") == 0) //Q2MOD
 		Cmd_Store_Teleport_f(ent);
+//	else if (Q_stricmp(cmd, "push") == 0)
+//		 Cmd_Push_f(ent);
 //	else if (Q_stricmp(cmd, "loadteleport") == 0) //Q2MOD
 //		Cmd_Load_Teleport_f(ent);
 	else if (Q_stricmp(cmd, "robo1") == 0)  //Q2MOD
@@ -1315,6 +1414,8 @@ void ClientCommand (edict_t *ent)
 		Cmd_RoboTwo_f(ent);
 	else if (Q_stricmp(cmd, "robo3") == 0)  //Q2MOD
 		Cmd_RoboThree_f(ent);
+	else if (Q_stricmp(cmd, "spawnfriend") == 0)  //Q2MOD
+		Cmd_SpawnFriend_f(ent);	
 	else if (Q_stricmp(cmd, "special") == 0)  //Q2MOD
 		Cmd_Special_f(ent);
 	else if (Q_stricmp (cmd, "god") == 0)

@@ -862,7 +862,6 @@ typedef struct
 	qboolean	roboTwo_state;
 	qboolean	roboThree_state;
 
-
 	int			power_cubes;	// used for tracking the cubes in coop games
 	int			score;			// for calculating total unit score in coop games
 
@@ -1045,6 +1044,8 @@ struct edict_s
 	float		air_finished;
 	float		gravity;		// per entity gravity multiplier (1.0 is normal)
 								// use for lowgrav artifact, flares
+	int			roboFriend;
+
 
 	edict_t		*goalentity;
 	edict_t		*movetarget;
