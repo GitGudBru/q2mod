@@ -1,17 +1,17 @@
 
-Titanfall Quake
-- x3 Robo boys w/ at least 1 Primary Weapons & 1 Ability
-- Pilot can Spring , Slide , Double Jump
-- x6 Pilot Weapons
-- Titan Auto-pilot
+Titanfall Quake Mod
+* x3 Robo boys w/ at least 1 Primary Weapons & 1 Ability
+* Pilot can Sprint , Slide , Double Jump
+* x6 Pilot Weapons
+* Titan Auto-pilot on exit 
 
 
-Weapons
-Hammond [1] P2016 
-Shotgun [3] -> Mastiff (Fires multiple projectile in a line) 
-Grenade Launcher [6] -> MGL Mag Launcher (fires 2 at a time)
-[0] -> LG-97 Thunderbolt (Small discharge ball)
-[7] -> Homing Rocket Launcher ( Press H to toggle)
+Weapons [number] = Numkey
+* Hammond [1] P2016 
+* Shotgun [3] -> Mastiff (Fires multiple projectile in a line) 
+* Grenade Launcher [6] -> MGL Mag Launcher (fires 2 at a time)
+* [0] -> LG-97 Thunderbolt (Small discharge ball)
+* [7] -> Homing Rocket Launcher ( Press H to toggle)
 
 
 Movement
